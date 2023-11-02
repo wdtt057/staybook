@@ -1,6 +1,7 @@
 package com.wdt.staybook.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -60,9 +61,20 @@ public class User implements Serializable {
 
     public static class Builder{
 
+        @JsonProperty("username")
         private String username;
+
+        @JsonProperty("password")
         private String password;
+
+        @JsonProperty("enabled")
         private boolean enabled;
+
+
+//        public Builder(String username, String password) {
+//            this.username = username;
+//            this.password = password;
+//        }
 
         public Builder setUsername(String username) {
             this.username = username;

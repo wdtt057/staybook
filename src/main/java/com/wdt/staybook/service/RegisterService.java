@@ -7,6 +7,7 @@ import com.wdt.staybook.exception.UserAlreadyExistException;
 import com.wdt.staybook.repository.AuthorityRepository;
 import com.wdt.staybook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class RegisterService {
     private UserRepository userRepository;
     private AuthorityRepository authorityRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public RegisterService(UserRepository userRepository, AuthorityRepository authorityRepository) {
+    public RegisterService(UserRepository userRepository, AuthorityRepository authorityRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -27,6 +30,8 @@ public class RegisterService {
         if (userRepository.existsById(user.getUsername())) {
             throw new UserAlreadyExistException("User already exist");
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setEnabled(true);
         userRepository.save(user);
         authorityRepository.save(new Authority(user.getUsername(), role.name()));
     }
