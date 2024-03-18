@@ -3,16 +3,19 @@ package com.wdt.staybook.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
-@Table(name = "user")
+@Table(name = "_user")
 @JsonDeserialize(builder = User.Builder.class)
-public class User implements Serializable {
+public class User implements UserDetails {
     private static final long serialVersionUID = 1l;
     @Id
     private String username;
@@ -20,8 +23,35 @@ public class User implements Serializable {
     @JsonIgnore
     private String password;
 
-    @JsonIgnore
-    private boolean enabled;
+    private boolean isEnable;
+
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isEnable;
+    }
 
     public User() {
     }
@@ -29,9 +59,11 @@ public class User implements Serializable {
     public User(Builder builder) {
         this.username = builder.username;
         this.password = builder.password;
-        this.enabled = builder.enabled;
+        this.role = builder.role;
+        this.isEnable = builder.isEnabled;
     }
 
+    @Override
     public String getUsername() {
         return username;
     }
@@ -41,6 +73,7 @@ public class User implements Serializable {
         return this;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -50,13 +83,26 @@ public class User implements Serializable {
         return this;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isEnable() {
+        return isEnable;
     }
 
-    public User setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public User setEnable(boolean enable) {
+        isEnable = enable;
         return this;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public User setRole(UserRole role) {
+        this.role = role;
+        return this;
+    }
+
+    public void setEnabled(boolean b) {
+
     }
 
     public static class Builder{
@@ -67,8 +113,11 @@ public class User implements Serializable {
         @JsonProperty("password")
         private String password;
 
-        @JsonProperty("enabled")
-        private boolean enabled;
+        @JsonProperty("user_role")
+        private UserRole role;
+
+        @JsonProperty("is_enabled")
+        private boolean isEnabled;
 
 
 //        public Builder(String username, String password) {
@@ -86,8 +135,8 @@ public class User implements Serializable {
             return this;
         }
 
-        public Builder setEnabled(boolean enabled) {
-            this.enabled = enabled;
+        public Builder setRole(UserRole role) {
+            this.role = role;
             return this;
         }
 
@@ -95,4 +144,5 @@ public class User implements Serializable {
             return new User(this);
         }
     }
+
 }

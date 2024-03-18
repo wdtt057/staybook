@@ -31,7 +31,6 @@ public class RegisterService {
             throw new UserAlreadyExistException("User already exist");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setEnabled(true);
         userRepository.save(user);
         authorityRepository.save(new Authority(user.getUsername(), role.name()));
     }
